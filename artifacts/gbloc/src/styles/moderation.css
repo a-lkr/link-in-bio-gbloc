@@ -1,0 +1,73 @@
+.moderation-page {
+  --mod-line: rgba(207, 178, 255, .14);
+  --mod-muted: #a79caf;
+  --mod-dim: #887d94;
+  --mod-accent: #c295ff;
+  width: min(100%, 1050px);
+  margin: 0 auto;
+  color: #f4eaff;
+}
+.moderation-heading { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:22px; }
+.moderation-heading .account-eyebrow { color:#b7a4d1; font:9px var(--app-font-mono); letter-spacing:.11em; text-transform:uppercase; }
+.moderation-heading h1 { margin:9px 0 6px; color:#f7f3ff; font-size:clamp(28px,3vw,38px); font-weight:650; letter-spacing:-.05em; line-height:1.2; }
+.moderation-heading p { margin:0; color:var(--mod-muted); font-size:12px; }
+.moderation-total { padding:8px 11px; border:1px solid var(--mod-line); border-radius:11px; color:#d8c3f2; background:rgba(153,91,210,.1); font:11px var(--app-font-mono); white-space:nowrap; }
+.moderation-toolbar { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:12px 15px; margin-bottom:12px; border:1px solid var(--mod-line); border-radius:14px; background:rgba(20,17,27,.88); }
+.moderation-toolbar p { margin:0; color:var(--mod-muted); font-size:11px; }
+.moderation-filters { display:flex; gap:6px; flex-wrap:wrap; }
+.moderation-filter { min-height:34px; padding:0 11px; border:1px solid transparent; border-radius:10px; color:#b8adbf; background:transparent; font-size:10px; cursor:pointer; transition:color .16s ease,background .16s ease,border-color .16s ease,box-shadow .16s ease; }
+.moderation-filter:hover { border-color:rgba(194,149,255,.17); color:#f4eaff; background:rgba(153,91,210,.1); }
+.moderation-filter.active { border-color:rgba(194,149,255,.3); color:#fbf7ff; background:linear-gradient(135deg,rgba(153,91,210,.25),rgba(126,82,179,.14)); box-shadow:inset 0 0 0 1px rgba(194,149,255,.08); }
+.moderation-filter:focus-visible { outline:2px solid #c295ff; outline-offset:2px; }
+.moderation-list { display:grid; gap:11px; }
+.moderation-report { overflow:hidden; border:1px solid var(--mod-line); border-radius:16px; background:rgba(20,17,27,.91); box-shadow:0 16px 38px rgba(0,0,0,.14); }
+.moderation-report-head { display:flex; align-items:flex-start; justify-content:space-between; gap:15px; padding:16px 18px 13px; }
+.moderation-target { display:flex; min-width:0; align-items:center; gap:11px; }
+.moderation-target-mark { width:38px; height:38px; flex:none; display:grid; place-items:center; border:1px solid rgba(194,149,255,.2); border-radius:12px; color:#e5d5fa; background:linear-gradient(145deg,rgba(153,91,210,.25),rgba(255,255,255,.035)); font-size:14px; font-weight:650; }
+.moderation-target-copy { min-width:0; }
+.moderation-target-copy strong { display:block; overflow:hidden; color:#f7f3ff; font-size:13px; text-overflow:ellipsis; white-space:nowrap; }
+.moderation-target-copy span { display:block; margin-top:3px; color:var(--mod-muted); font:10px var(--app-font-mono); }
+.moderation-status { flex:none; padding:5px 8px; border:1px solid rgba(194,149,255,.19); border-radius:999px; color:#d6baff; background:rgba(153,91,210,.1); font-size:9px; }
+.moderation-status[data-status="new"] { color:#f1d4a7; border-color:rgba(241,212,167,.2); background:rgba(182,132,64,.1); }
+.moderation-status[data-status="dismissed"] { color:#aaa1b2; }
+.moderation-status[data-status="actioned"] { color:#8ee0c4; border-color:rgba(142,224,196,.2); background:rgba(71,150,119,.1); }
+.moderation-report-body { padding:0 18px 15px; }
+.moderation-meta { display:flex; gap:8px; align-items:center; flex-wrap:wrap; color:#c7b9d4; font-size:10px; }
+.moderation-reason { padding:4px 8px; border-radius:7px; color:#eedfff; background:rgba(194,149,255,.12); }
+.moderation-report-body p { margin:11px 0 0; color:#b7abbf; font-size:11px; line-height:1.7; white-space:pre-wrap; overflow-wrap:anywhere; }
+.moderation-note { width:100%; min-height:68px; resize:vertical; padding:10px 11px; margin-top:12px; border:1px solid rgba(207,178,255,.17); border-radius:10px; outline:none; color:#f1eaff; background:#100d16; font:11px/1.6 var(--app-font-sans); }
+.moderation-note:focus { border-color:rgba(194,149,255,.48); box-shadow:0 0 0 3px rgba(153,91,210,.1); }
+.moderation-actions { display:flex; align-items:center; gap:7px; flex-wrap:wrap; padding:12px 18px 15px; border-top:1px solid rgba(207,178,255,.09); }
+.moderation-action { min-height:34px; display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:0 10px; border:1px solid rgba(198,176,219,.16); border-radius:9px; color:#d5c8e2; background:rgba(255,255,255,.035); font-size:10px; cursor:pointer; transition:background .18s ease,border-color .18s ease,transform .18s ease; }
+.moderation-action:hover:not(:disabled) { transform:translateY(-1px); border-color:rgba(194,149,255,.35); background:rgba(153,91,210,.11); }
+.moderation-action.primary { border-color:rgba(194,149,255,.3); color:#f7efff; background:rgba(153,91,210,.2); }
+.moderation-action:disabled { opacity:.5; cursor:not-allowed; }
+.moderation-error { padding:11px 13px; margin:0 0 12px; border:1px solid rgba(238,120,145,.25); border-radius:11px; color:#ffc2cd; background:rgba(114,36,55,.18); font-size:11px; }
+.moderation-empty { padding:35px 20px; border:1px dashed rgba(207,178,255,.2); border-radius:15px; color:var(--mod-muted); background:rgba(20,17,27,.55); text-align:center; }
+.moderation-empty strong { display:block; margin-bottom:5px; color:#eee5f5; font-size:13px; }
+.moderation-loading { display:grid; gap:10px; }
+.moderation-skeleton { height:120px; border:1px solid var(--mod-line); border-radius:15px; background:linear-gradient(100deg,rgba(20,17,27,.8) 25%,rgba(52,42,62,.7) 38%,rgba(20,17,27,.8) 60%); background-size:300% 100%; animation:moderation-shimmer 1.5s ease infinite; }
+@keyframes moderation-shimmer { to { background-position-x:-150%; } }
+.report-dialog-backdrop { position:fixed; z-index:100; inset:0; display:grid; place-items:center; padding:20px; background:rgba(9,6,13,.72); backdrop-filter:blur(8px); }
+.report-dialog { width:min(100%,460px); padding:22px; border:1px solid rgba(207,178,255,.2); border-radius:18px; color:#f4eaff; background:#17121e; box-shadow:0 24px 90px rgba(0,0,0,.4); }
+.report-dialog h2 { margin:0 0 6px; font-size:19px; letter-spacing:-.03em; }
+.report-dialog > p { margin:0 0 17px; color:#a79caf; font-size:11px; line-height:1.7; }
+.report-field { display:grid; gap:7px; margin-top:13px; color:#dfd4e8; font-size:10px; font-weight:600; }
+.report-field .report-select-trigger,.report-field textarea { width:100%; min-height:40px; padding:10px 11px; border:1px solid rgba(207,178,255,.17); border-radius:10px; outline:none; color:#f1eaff; background:#100d16; font:11px var(--app-font-sans); }
+.report-field textarea { min-height:86px; resize:vertical; line-height:1.6; }
+.report-field .report-select-trigger:focus-visible,.report-field textarea:focus { border-color:rgba(194,149,255,.48); box-shadow:0 0 0 3px rgba(153,91,210,.1); }
+.report-dialog-error { padding:9px 10px; margin-top:12px; border:1px solid rgba(238,120,145,.25); border-radius:9px; color:#ffc2cd; background:rgba(114,36,55,.18); font-size:10px; }
+.report-dialog-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:18px; }
+.report-trigger { position:fixed; right:18px; bottom:18px; z-index:5; width:36px; min-width:36px; height:36px; min-height:36px; display:flex; align-items:center; justify-content:center; padding:0; border:1px solid rgba(237,226,247,.2); border-radius:50%; color:rgba(250,244,255,.76); background:rgba(21,17,29,.58); backdrop-filter:blur(12px); cursor:pointer; opacity:.78; transition:opacity .18s ease,background .18s ease,border-color .18s ease; }
+.report-trigger:hover { opacity:1; border-color:rgba(237,226,247,.38); background:rgba(21,17,29,.82); }
+.report-success { position:fixed; right:18px; bottom:62px; z-index:6; padding:10px 13px; border:1px solid rgba(142,224,196,.25); border-radius:11px; color:#b8f3df; background:rgba(21,35,31,.9); font-size:11px; }
+.moderation-inline-error { margin:12px 0 0; color:#ffb1be; font-size:11px; }
+@media (max-width:640px) {
+  .moderation-heading { align-items:flex-start; flex-direction:column; }
+  .moderation-toolbar { align-items:flex-start; flex-direction:column; }
+  .moderation-report-head { padding:14px; }
+  .moderation-report-body { padding:0 14px 13px; }
+  .moderation-actions { padding:11px 14px 13px; }
+  .moderation-action { flex:1; }
+  .report-trigger { right:12px; bottom:12px; }
+}

@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Thai:wght@400;500;600;700&display=swap');
+
+.gbloc-home-atlas {
+  --atlas-bg: #101918;
+  --atlas-panel: #182321;
+  --atlas-panel-soft: #1d2926;
+  --atlas-ink: #f2f1df;
+  --atlas-muted: #aab6a9;
+  --atlas-dim: #71817a;
+  --atlas-line: rgba(205, 220, 190, .16);
+  --atlas-acid: #d4e886;
+  --atlas-coral: #e6a083;
+  --atlas-font: 'DM Sans', 'Noto Sans Thai', system-ui, sans-serif;
+  --atlas-mono: 'IBM Plex Mono', monospace;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 100dvh;
+  color: var(--atlas-ink);
+  background: var(--atlas-bg);
+  font-family: var(--atlas-font);
+  color-scheme: dark;
+  overflow: clip;
+}
+.gbloc-home-atlas *, .gbloc-home-atlas *::before, .gbloc-home-atlas *::after { box-sizing: inherit; }
+.gbloc-home-atlas a { color: inherit; text-decoration: none; }
+.gbloc-home-atlas button { font: inherit; }

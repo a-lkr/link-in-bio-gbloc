@@ -1,0 +1,211 @@
+/*
+ * GBLOC private-page identity layer.
+ * Deliberately scoped away from .creator-studio and .public-profile so the
+ * canonical landing page and creator-owned public profile themes stay intact.
+ */
+:where(.editor-frame, .auth-page, .price-page, .cookie-page, .terms-page, .admin-page, .moderation-page, .not-found-page) {
+  --brand-bg: #0b0911;
+  --brand-panel: #15111d;
+  --brand-panel-raised: #1b1624;
+  --brand-ink: #f6f1fb;
+  --brand-muted: #b5aabe;
+  --brand-dim: #93889f;
+  --brand-line: rgba(207, 178, 255, .16);
+  --brand-lavender: #c5a4f4;
+  --brand-lavender-soft: rgba(153, 91, 210, .13);
+  --brand-font: 'Prompt', 'Noto Sans Thai', sans-serif;
+  color: var(--brand-ink);
+  font-family: var(--brand-font);
+}
+
+:where(.editor-frame, .auth-page, .price-page, .cookie-page, .terms-page, .admin-page, .moderation-page, .not-found-page) :is(button, input, textarea, select) {
+  font-family: var(--brand-font);
+}
+
+:where(.editor-frame, .auth-page, .price-page, .cookie-page, .terms-page, .admin-page, .moderation-page, .not-found-page) :is(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--brand-lavender);
+  outline-offset: 3px;
+}
+
+/* Shared editor shell for signed-in account, profile, link, admin and reports. */
+.editor-frame {
+  min-height: 100dvh;
+  color: var(--brand-ink);
+  background:
+    radial-gradient(ellipse at 78% 0%, rgba(110, 61, 158, .12), transparent 38rem),
+    var(--brand-bg);
+}
+.editor-sidebar {
+  border-color: var(--brand-line);
+  background: rgba(18, 14, 25, .95);
+}
+.editor-main { color: var(--brand-ink); }
+.editor-topline { border-color: var(--brand-line); }
+.page-heading h1,
+.account-head h1,
+.admin-heading h1,
+.moderation-heading h1,
+.customize-page .cz-head h1,
+.links-page .ln-head h1 { font-family: var(--brand-font); }
+
+/* Editorial pages. */
+.price-page,
+.cookie-page,
+.terms-page {
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(112, 55, 174, .18), transparent 35rem),
+    var(--brand-bg);
+}
+.price-page .price-status,
+.cookie-page .cookie-panel,
+.terms-page .terms-card {
+  border-color: var(--brand-line);
+  background-color: rgba(22, 18, 30, .9);
+}
+.cookie-page .cookie-always-on,
+.cookie-page .cookie-save-status {
+  border-color: rgba(197, 164, 244, .28);
+  color: #e2d4f3;
+  background: rgba(153, 91, 210, .1);
+}
+.terms-page .terms-heading h1,
+.cookie-page .cookie-page-main h1 { font-family: var(--brand-font); }
+
+/* Auth composition retains existing provider and route behavior. */
+.auth-page {
+  grid-template-columns: minmax(300px, .92fr) minmax(420px, 1.08fr);
+  background: var(--brand-bg);
+}
+.auth-copy {
+  color: var(--brand-ink);
+  background:
+    radial-gradient(ellipse at 75% 75%, rgba(153, 91, 210, .16), transparent 24rem),
+    #15111d;
+}
+.auth-copy h1 { font-family: var(--brand-font); }
+.auth-form { background: #0e0b14; }
+.recovery-card {
+  border-color: var(--brand-line);
+  background: var(--brand-panel);
+}
+
+/* Quietly distinctive recovery state for unknown routes. */
+.not-found-page {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  min-height: 100dvh;
+  overflow: hidden;
+  place-items: center;
+  padding: 28px;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(104, 64, 146, .2), transparent 30rem),
+    var(--brand-bg);
+}
+.not-found-orbit {
+  position: absolute;
+  z-index: -1;
+  color: rgba(197, 164, 244, .035);
+  font: 700 clamp(180px, 38vw, 440px)/1 var(--app-font-mono);
+  letter-spacing: -.12em;
+  transform: rotate(-8deg);
+  user-select: none;
+}
+.not-found-card {
+  width: min(100%, 520px);
+  padding: clamp(25px, 5vw, 44px);
+  border: 1px solid var(--brand-line);
+  border-radius: 20px;
+  background: rgba(20, 16, 27, .88);
+  box-shadow: 0 28px 90px rgba(0, 0, 0, .35);
+  backdrop-filter: blur(16px);
+}
+.not-found-card .brand { margin-bottom: 46px; }
+.not-found-kicker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--brand-lavender);
+  font: 9px var(--app-font-mono);
+  letter-spacing: .12em;
+}
+.not-found-card h1 {
+  margin: 17px 0 8px;
+  color: var(--brand-ink);
+  font-size: clamp(30px, 6vw, 44px);
+  letter-spacing: -.055em;
+}
+.not-found-card p {
+  margin: 0;
+  color: var(--brand-muted);
+  font-size: 13px;
+  line-height: 1.8;
+}
+.not-found-home {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 26px;
+  padding: 0 14px;
+  border: 1px solid rgba(197, 164, 244, .35);
+  border-radius: 10px;
+  color: #f5edff;
+  background: rgba(153, 91, 210, .16);
+  font-size: 11px;
+}
+.not-found-home:hover { border-color: var(--brand-lavender); background: rgba(153, 91, 210, .25); }
+
+/* Dedicated report-queue skin; does not touch profile moderation controls. */
+.moderation-page .moderation-report,
+.moderation-page .moderation-toolbar {
+  border-color: var(--brand-line);
+  background: rgba(20, 16, 27, .9);
+}
+.moderation-page .moderation-report { border-radius: 15px; }
+.moderation-page .moderation-filter {
+  color: #c7bbd4;
+  border-color: rgba(207, 178, 255, .17);
+  background: rgba(255, 255, 255, .025);
+}
+.moderation-page .moderation-filter.active {
+  color: #f7f1ff;
+  border-color: rgba(197, 164, 244, .42);
+  background: rgba(153, 91, 210, .17);
+}
+.moderation-page .moderation-note {
+  color: var(--brand-ink);
+  border-color: var(--brand-line);
+  background: #100d16;
+}
+
+@media (max-width: 700px) {
+  .editor-frame { padding-bottom: 68px; }
+  .editor-sidebar {
+    inset: auto 0 0;
+    width: 100%;
+    height: auto;
+    margin: 0;
+    border: 0;
+    border-top: 1px solid var(--brand-line);
+    border-radius: 0;
+    background: rgba(16, 12, 22, .97);
+  }
+  .editor-nav-link { color: #c5b9d2; }
+  .editor-nav-link.active { color: #f5edff; }
+  .auth-page { display: block; }
+  .auth-copy { display: none; }
+  .auth-form { min-height: 100dvh; padding: 72px 16px 36px; }
+  .auth-back { top: 24px; right: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :where(.editor-frame, .auth-page, .price-page, .cookie-page, .terms-page, .admin-page, .moderation-page, .not-found-page) *,
+  :where(.editor-frame, .auth-page, .price-page, .cookie-page, .terms-page, .admin-page, .moderation-page, .not-found-page) *::before,
+  :where(.editor-frame, .auth-page, .price-page, .cookie-page, .terms-page, .admin-page, .moderation-page, .not-found-page) *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}

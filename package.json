@@ -1,0 +1,25 @@
+{
+  "name": "workspace",
+  "version": "0.0.0",
+  "license": "MIT",
+  "packageManager": "pnpm@10.26.1",
+  "engines": {
+    "node": ">=22.12",
+    "pnpm": ">=10"
+  },
+  "scripts": {
+    "preinstall": "node scripts/check-package-manager.mjs",
+    "dev": "node scripts/dev-local.mjs",
+    "db:up": "docker compose up -d db",
+    "db:down": "docker compose down",
+    "db:push": "node scripts/db-push.mjs",
+    "build": "pnpm run typecheck && pnpm -r --if-present run build",
+    "typecheck:libs": "tsc --build",
+    "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
+  },
+  "private": true,
+  "devDependencies": {
+    "prettier": "^3.9.10",
+    "typescript": "~5.9.3"
+  }
+}

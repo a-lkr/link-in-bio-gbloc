@@ -1,0 +1,49 @@
+.terms-page { min-height:100vh; }
+.terms-main { width:min(100% - 36px, 920px); margin:0 auto; padding:76px 0 100px; }
+.terms-heading { margin:0 0 30px; }
+.terms-heading .eyebrow { display:flex; align-items:center; gap:9px; color:#bca5d8; font:9px var(--app-font-mono); letter-spacing:.14em; }
+.terms-heading .eyebrow i { width:7px; height:7px; border-radius:50%; background:#c496ff; box-shadow:0 0 15px rgba(190,137,255,.7); }
+.terms-heading h1 { margin:20px 0 12px; color:#f6f0ff; font-size:clamp(34px,6vw,58px); line-height:1.04; letter-spacing:-.055em; }
+.terms-heading h1 em { color:#c693ff; font-style:normal; }
+.terms-heading p { color:#a99eb6; font-size:13px; line-height:1.8; }
+.terms-card { overflow:hidden; border:1px solid rgba(207,178,255,.15); border-radius:20px; background:linear-gradient(155deg,rgba(25,19,34,.96),rgba(15,12,21,.98)); box-shadow:0 24px 80px rgba(0,0,0,.22); }
+.legal-jump-links { display:flex; flex-wrap:wrap; gap:8px; margin:0 0 18px; }
+.legal-jump-links a { min-height:36px; display:inline-flex; align-items:center; padding:0 13px; border:1px solid rgba(207,178,255,.15); border-radius:10px; color:#dac8ef; background:rgba(173,111,235,.07); font:10px var(--app-font-mono); text-decoration:none; transition:background .18s ease,border-color .18s ease; }
+.legal-jump-links a:hover { border-color:rgba(199,154,255,.34); background:rgba(173,111,235,.14); }
+.legal-document-section { margin-top:16px; scroll-margin-top:24px; }
+.legal-section-heading { display:flex; align-items:center; gap:11px; padding:17px 24px; border-bottom:1px solid rgba(207,178,255,.12); background:rgba(173,111,235,.045); }
+.legal-section-heading > span { color:#bd8cf7; font:10px var(--app-font-mono); letter-spacing:.1em; }
+.legal-section-heading h2 { margin:0; color:#f5edff; font-size:15px; font-weight:600; line-height:1.5; }
+.terms-effective { padding:19px 24px 17px; border-bottom:1px solid rgba(207,178,255,.12); background:rgba(173,111,235,.055); }
+.terms-effective-title { display:flex; align-items:center; gap:8px; color:#e6d6fb; font-size:12px; }
+.terms-effective-title svg { color:#c79aff; }
+.terms-effective time { display:block; margin:9px 0 5px; color:#fff; font-size:14px; font-weight:600; }
+.terms-effective p { margin:0; color:#a99eb6; font-size:11px; line-height:1.7; }
+.terms-document-content { padding:28px clamp(20px,5vw,46px) 42px; color:#c9c0d1; font-size:13px; line-height:1.95; overflow-wrap:anywhere; }
+.terms-document-content h1 { margin:0 0 7px; color:#faf6ff; font-size:25px; line-height:1.35; letter-spacing:-.03em; }
+.terms-document-content h1 + p { margin-top:0; color:#a99db8; }
+.terms-document-content h2 { margin:31px 0 8px; padding-top:17px; border-top:1px solid rgba(207,178,255,.1); color:#efe5fb; font-size:16px; line-height:1.5; }
+.terms-document-content p { margin:10px 0; }
+.terms-document-content strong { color:#f1e8fb; font-weight:650; }
+.terms-document-content code { padding:2px 5px; border:1px solid rgba(199,154,255,.16); border-radius:5px; color:#d5b8ff; background:rgba(173,111,235,.08); font:inherit; }
+.terms-document-content ul { padding-left:22px; margin:9px 0; }
+.terms-document-content li { padding-left:3px; margin:4px 0; }
+.terms-document-content li::marker { color:#bd8cf7; }
+.terms-state { min-height:240px; display:flex; align-items:center; justify-content:center; flex-direction:column; padding:32px; border:1px dashed rgba(207,178,255,.2); border-radius:18px; color:#a99eb6; background:rgba(20,16,27,.55); text-align:center; }
+.terms-state > svg { color:#c294ff; }
+.terms-state h2 { margin:13px 0 4px; color:#f1eafa; font-size:17px; }
+.terms-state p { max-width:470px; margin:4px 0 14px; font-size:12px; line-height:1.8; }
+.terms-back,.terms-retry { min-height:36px; display:inline-flex; align-items:center; justify-content:center; gap:7px; padding:0 12px; border:1px solid rgba(199,154,255,.25); border-radius:10px; color:#ddc6ff; background:rgba(173,111,235,.08); font:inherit; font-size:11px; text-decoration:none; cursor:pointer; }
+.terms-back:hover,.terms-retry:hover { background:rgba(173,111,235,.16); }
+@media (max-width:620px) {
+  .terms-main { width:min(100% - 28px, 920px); padding:52px 0 78px; }
+  .terms-heading { margin-bottom:22px; }
+  .terms-card { border-radius:15px; }
+ .legal-section-heading { padding:15px 16px; }
+ .legal-section-heading h2 { font-size:13px; }
+ .legal-jump-links a { font-size:9px; }
+  .terms-effective { padding:16px; }
+  .terms-document-content { padding:22px 17px 30px; font-size:12px; }
+  .terms-document-content h1 { font-size:22px; }
+  .terms-document-content h2 { font-size:15px; }
+}

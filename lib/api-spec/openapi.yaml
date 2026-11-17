@@ -1,0 +1,1973 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: auth
+    description: GBLOC account sessions and external sign-in providers.
+  - name: profiles
+    description: Public profiles and profile customization.
+  - name: account
+    description: Signed-in account overview.
+  - name: billing
+    description: One-time Basic membership checkout and legacy subscription status.
+  - name: reports
+    description: Profile reporting and moderation.
+  - name: Storage
+    description: Object storage upload and serving endpoints.
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /auth/me:
+    get:
+      tags: [auth]
+      operationId: getAuthSession
+      summary: Get the current GBLOC authentication session
+      responses:
+        "200":
+          description: Current signed-in user, or null when signed out.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSessionState"
+  /auth/logout:
+    post:
+      tags: [auth]
+      operationId: signOut
+      summary: End the current GBLOC authentication session
+      responses:
+        "200":
+          description: Session ended.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthActionResponse"
+  /auth/google/start:
+    get:
+      tags: [auth]
+      operationId: startGoogleAuth
+      summary: Redirect to Google OAuth
+      responses:
+        "302":
+          description: Redirect to Google's authorization page.
+  /auth/google/callback:
+    get:
+      tags: [auth]
+      operationId: finishGoogleAuth
+      summary: Complete Google OAuth
+      responses:
+        "302":
+          description: Redirect to the app after OAuth.
+  /profiles/me:
+    get:
+      tags: [profiles]
+      operationId: getMyProfile
+      summary: Get the signed-in user's profile
+      responses:
+        "200":
+          description: Profile and its social links.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileWithLinks"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: The plan's profile link limit has been reached.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    patch:
+      tags: [profiles]
+      operationId: updateMyProfile
+      summary: Update profile settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdateInput"
+      responses:
+        "200":
+          description: Updated profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+        "400":
+          description: Invalid profile data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: The signed-in account has no profile to confirm against.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: Username is already taken.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /profiles/username-availability:
+    get:
+      tags: [profiles]
+      operationId: checkUsernameAvailability
+      summary: Check whether a username can be claimed
+      parameters:
+        - name: username
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 20
+            pattern: "^[A-Za-z0-9_]{3,20}$"
+      responses:
+        "200":
+          description: Username availability result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UsernameAvailability"
+  /profiles/me/links:
+    put:
+      tags: [profiles]
+      operationId: replaceMyProfileLinks
+      summary: Replace the signed-in user's profile links
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileLinksInput"
+      responses:
+        "200":
+          description: Updated profile links.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ProfileLink"
+        "400":
+          description: Invalid links.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /profiles/{username}:
+    get:
+      tags: [profiles]
+      operationId: getPublicProfile
+      summary: Get a public profile by username
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 20
+            pattern: "^[A-Za-z0-9_]{3,20}$"
+      responses:
+        "200":
+          description: Public profile and links.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicProfileResponse"
+        "404":
+          description: Profile not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /profiles/{username}/views:
+    post:
+      tags: [profiles]
+      operationId: recordProfileView
+      summary: Record a public profile view
+      parameters:
+        - name: username
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 20
+            pattern: "^[A-Za-z0-9_]{3,20}$"
+      responses:
+        "200":
+          description: Updated public view count.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ViewCount"
+        "404":
+          description: Profile not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /account/summary:
+    get:
+      tags: [account]
+      operationId: getAccountSummary
+      summary: Get account and profile status
+      responses:
+        "200":
+          description: Account summary.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountSummary"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /membership/me:
+    get:
+      tags: [account]
+      operationId: getMyMembership
+      summary: Get the signed-in user's active membership
+      responses:
+        "200":
+          description: Active membership or free plan.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MembershipState"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /billing/config:
+    get:
+      tags: [billing]
+      operationId: getBillingConfig
+      summary: Get available membership checkout plans
+      responses:
+        "200":
+          description: Plans available for checkout in this installation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingConfig"
+  /billing/checkout:
+    post:
+      tags: [billing]
+      operationId: createCheckoutSession
+      summary: Create a one-time Basic membership checkout session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CheckoutInput"
+      responses:
+        "200":
+          description: Checkout session URL.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckoutSession"
+        "400":
+          description: Invalid plan.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: An active subscription or Pro membership blocks Basic checkout.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: Billing is not configured for this installation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /billing/portal:
+    post:
+      tags: [billing]
+      operationId: createBillingPortalSession
+      summary: Create a customer portal session
+      responses:
+        "200":
+          description: Customer portal URL.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BillingPortalSession"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Paid subscription not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: Billing is not configured for this installation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/memberships:
+    get:
+      tags: [reports]
+      operationId: getMembershipList
+      summary: List active gifted memberships for the owner
+      responses:
+        "200":
+          description: Active memberships.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MembershipListResponse"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Owner access required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    post:
+      tags: [reports]
+      operationId: giftMembership
+      summary: Gift a membership plan to a profile for a number of days
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GiftMembershipInput"
+      responses:
+        "200":
+          description: Membership gifted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GiftMembershipResult"
+        "400":
+          description: Invalid gift details.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Owner access required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Profile not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /account/email:
+    get:
+      tags: [account]
+      operationId: getAccountEmail
+      summary: Get the signed-in user's saved email
+      responses:
+        "200":
+          description: Saved email state for the signed-in user.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountEmailState"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /account/email/sync:
+    post:
+      tags: [account]
+      operationId: syncAccountEmail
+      summary: Store the signed-in user's verified primary email
+      responses:
+        "200":
+          description: Saved verified email.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountEmailState"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: No verified primary email is available.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "503":
+          description: Email could not be verified with the identity provider.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /account/deletion:
+    get:
+      tags: [account]
+      operationId: getAccountDeletionStatus
+      summary: Get status of an older deletion request
+      description: Reports requests created before the immediate-deletion flow was introduced.
+      responses:
+        "200":
+          description: Current account deletion status.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDeletionStatus"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    post:
+      tags: [account]
+      operationId: requestAccountDeletion
+      summary: Permanently delete account
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountDeletionInput"
+      responses:
+        "200":
+          description: Account and associated data permanently deleted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDeletionResult"
+        "400":
+          description: Permanent deletion confirmation is required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "500":
+          description: Deletion could not be completed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    delete:
+      tags: [account]
+      operationId: cancelAccountDeletion
+      summary: Cancel an older pending deletion request
+      description: Only applies to requests submitted before immediate deletion was introduced. New confirmed deletions cannot be canceled.
+      deprecated: true
+      responses:
+        "200":
+          description: Deletion request canceled.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountDeletionStatus"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: No cancellable deletion request exists.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: The deletion process has already started.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /reports:
+    post:
+      tags: [reports]
+      operationId: createProfileReport
+      summary: Report a public profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileReportInput"
+      responses:
+        "201":
+          description: Report submitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileReportResponse"
+        "400":
+          description: Invalid report or own profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Profile not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: An open report already exists.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /legal/terms:
+    get:
+      tags: [legal]
+      operationId: getPublishedTerms
+      summary: Get the published terms of service
+      responses:
+        "200":
+          description: Published terms of service.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TermsDocument"
+        "404":
+          description: Terms have not been published.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /legal/privacy:
+    get:
+      tags: [legal]
+      operationId: getPrivacyPolicy
+      summary: Get the privacy policy
+      responses:
+        "200":
+          description: Privacy policy for account email data.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PrivacyPolicyDocument"
+  /admin/legal/terms:
+    get:
+      tags: [legal]
+      operationId: getAdminTerms
+      summary: Get terms draft and publication status for the owner
+      responses:
+        "200":
+          description: Editable terms content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminTermsDocument"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Owner access required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    put:
+      tags: [legal]
+      operationId: publishTerms
+      summary: Publish revised terms for the owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TermsDocumentInput"
+      responses:
+        "200":
+          description: Published terms with automatically assigned effective time.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TermsDocument"
+        "400":
+          description: Invalid terms content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Owner access required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /admin/legal/privacy:
+    get:
+      tags: [legal]
+      operationId: getAdminPrivacyPolicy
+      summary: Get privacy policy draft and publication status for the owner
+      responses:
+        "200":
+          description: Editable privacy policy content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminPrivacyPolicyDocument"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Owner access required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    put:
+      tags: [legal]
+      operationId: publishPrivacyPolicy
+      summary: Publish revised privacy policy for the owner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PrivacyPolicyInput"
+      responses:
+        "200":
+          description: Published privacy policy.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminPrivacyPolicyDocument"
+        "400":
+          description: Invalid privacy policy content.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Owner access required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /moderation/access:
+    get:
+      tags: [reports]
+      operationId: getModeratorAccess
+      summary: Check whether the signed-in user can moderate reports
+      responses:
+        "200":
+          description: Moderator access state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModeratorAccessResponse"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /moderation/reports:
+    get:
+      tags: [reports]
+      operationId: getModerationReports
+      summary: List profile reports for moderators
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [all, new, reviewing, dismissed, actioned]
+            default: new
+      responses:
+        "200":
+          description: Moderation reports.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModerationReportListResponse"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Moderator access required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /moderation/reports/{reportId}:
+    patch:
+      tags: [reports]
+      operationId: updateModerationReport
+      summary: Update a report and its profile visibility
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F-]{36}$"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ModerationReportUpdateInput"
+      responses:
+        "200":
+          description: Updated moderation report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModerationReportUpdateResponse"
+        "400":
+          description: Invalid moderation action.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Moderator access required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Report not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /moderation/moderators:
+    get:
+      tags: [reports]
+      operationId: getModeratorList
+      summary: List active profile moderators for the owner
+      responses:
+        "200":
+          description: Active moderators.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModeratorListResponse"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Owner access required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+    post:
+      tags: [reports]
+      operationId: addModerator
+      summary: Add a profile moderator by verified email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddModeratorInput"
+      responses:
+        "201":
+          description: Moderator added.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModeratorCreateResult"
+        "400":
+          description: Invalid email.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Owner access required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "409":
+          description: Moderator already exists or is the owner.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /moderation/moderators/{moderatorId}:
+    delete:
+      tags: [reports]
+      operationId: removeModerator
+      summary: Remove a profile moderator
+      parameters:
+        - name: moderatorId
+          in: path
+          required: true
+          schema:
+            type: string
+            pattern: "^[0-9a-fA-F-]{36}$"
+      responses:
+        "200":
+          description: Moderator access removed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ModeratorRemovalResult"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "403":
+          description: Owner access required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Moderator not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /storage/uploads/request-url:
+    post:
+      tags: [Storage]
+      operationId: requestUploadUrl
+      summary: Request a signed URL for uploading a profile asset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadUrlRequest"
+      responses:
+        "200":
+          description: Signed upload URL and object path.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadUrlResponse"
+        "400":
+          description: Invalid upload metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /storage/uploads/complete:
+    post:
+      tags: [Storage]
+      operationId: completeUpload
+      summary: Mark an uploaded profile asset as publicly available
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadCompleteInput"
+      responses:
+        "200":
+          description: Upload is now ready to use in a public profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadCompleteResponse"
+        "401":
+          description: Sign-in required.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+        "404":
+          description: Upload not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+  /storage/objects/{objectPath}:
+    get:
+      tags: [Storage]
+      operationId: getStorageObject
+      summary: Serve a stored profile asset
+      parameters:
+        - name: objectPath
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Stored object bytes.
+          content:
+            "*/*":
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Object not found.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorEnvelope"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ErrorEnvelope:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+    AuthUser:
+      type: object
+      required: [id, email]
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+    AuthSessionState:
+      type: object
+      required: [user]
+      properties:
+        user:
+          oneOf:
+            - $ref: "#/components/schemas/AuthUser"
+            - type: "null"
+    AuthActionResponse:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string }
+    Profile:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/ProfileAppearance"
+      required:
+        - id
+        - username
+        - displayName
+        - bio
+        - showAvatar
+        - location
+        - theme
+        - backgroundColor
+        - avatarPath
+        - backgroundPath
+        - backgroundType
+        - audioPath
+        - audioTitle
+        - audioCoverPath
+        - showMusicPlayer
+        - showVolumeControl
+        - focusX
+        - focusY
+        - dimOpacity
+        - enterText
+        - showViews
+        - viewCount
+        - premiumBackground
+        - premiumBackgroundStrength
+        - premiumFont
+        - premiumTextEffect
+        - showProBadge
+        - showCredit
+        - extraAudioTracks
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+        username:
+          type: string
+          minLength: 3
+          maxLength: 20
+          pattern: "^[a-z0-9_]{3,20}$"
+        displayName:
+          type: string
+          maxLength: 32
+        bio:
+          type: string
+          maxLength: 120
+        showAvatar:
+          type: boolean
+        location:
+          type: string
+          maxLength: 80
+        theme:
+          type: string
+          enum: [ember, tide, moss, orchid]
+        backgroundColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        avatarPath:
+          type: [string, "null"]
+        backgroundPath:
+          type: [string, "null"]
+        backgroundType:
+          type: [string, "null"]
+          enum: [image, video, null]
+        audioPath:
+          type: [string, "null"]
+        audioTitle:
+          type: string
+          maxLength: 80
+        audioCoverPath:
+          type: [string, "null"]
+        extraAudioTracks:
+          type: array
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/ExtraAudioTrack"
+        showMusicPlayer:
+          type: boolean
+        showVolumeControl:
+          type: boolean
+        focusX:
+          type: integer
+          minimum: 0
+          maximum: 100
+        focusY:
+          type: integer
+          minimum: 0
+          maximum: 100
+        dimOpacity:
+          type: integer
+          minimum: 0
+          maximum: 100
+        enterText:
+          type: string
+          maxLength: 40
+        showViews:
+          type: boolean
+        premiumBackground:
+          type: string
+          enum: [none, aurora, stars, rain, film]
+        premiumBackgroundStrength:
+          type: integer
+          minimum: 0
+          maximum: 100
+        premiumFont:
+          type: string
+          enum: [default, prompt, kanit, chakra, ibm-plex, mitr]
+        premiumTextEffect:
+          type: string
+          enum: [none, glow, gradient, fuzzy]
+        showProBadge:
+          type: boolean
+        showCredit:
+          type: boolean
+        viewCount:
+          type: integer
+          minimum: 0
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ProfileUpdateInput:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/ProfileAppearanceInput"
+      minProperties: 1
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 20
+          pattern: "^[A-Za-z0-9_]{3,20}$"
+        displayName:
+          type: string
+          maxLength: 32
+        bio:
+          type: string
+          maxLength: 120
+        showAvatar:
+          type: boolean
+        location:
+          type: string
+          maxLength: 80
+        theme:
+          type: string
+          enum: [ember, tide, moss, orchid]
+        backgroundColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        avatarPath:
+          type: [string, "null"]
+        backgroundPath:
+          type: [string, "null"]
+        backgroundType:
+          type: [string, "null"]
+          enum: [image, video, null]
+        audioPath:
+          type: [string, "null"]
+        audioTitle:
+          type: string
+          maxLength: 80
+        audioCoverPath:
+          type: [string, "null"]
+        extraAudioTracks:
+          type: array
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/ExtraAudioTrack"
+        showMusicPlayer:
+          type: boolean
+        showVolumeControl:
+          type: boolean
+        focusX:
+          type: integer
+          minimum: 0
+          maximum: 100
+        focusY:
+          type: integer
+          minimum: 0
+          maximum: 100
+        dimOpacity:
+          type: integer
+          minimum: 0
+          maximum: 100
+        enterText:
+          type: string
+          maxLength: 40
+        showViews:
+          type: boolean
+        premiumBackground:
+          type: string
+          enum: [none, aurora, stars, rain, film]
+        premiumBackgroundStrength:
+          type: integer
+          minimum: 0
+          maximum: 100
+        premiumFont:
+          type: string
+          enum: [default, prompt, kanit, chakra, ibm-plex, mitr]
+        premiumTextEffect:
+          type: string
+          enum: [none, glow, gradient, fuzzy]
+        showProBadge:
+          type: boolean
+        showCredit:
+          type: boolean
+    ProfileAppearanceInput:
+      type: object
+      properties:
+        displayNameColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        descriptionColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        locationColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        socialColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        musicColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        viewsColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        enterTextColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        glowIntensity:
+          type: integer
+          minimum: 0
+          maximum: 100
+        showProfileFrame:
+          type: boolean
+        profileFrameColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        profileFrameBackgroundColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        profileFrameBlur:
+          type: integer
+          minimum: 0
+          maximum: 20
+        backgroundEffect:
+          type: string
+          enum: [black, blur]
+        premiumBackground:
+          type: string
+          enum: [none, aurora, stars, rain, film]
+        premiumBackgroundStrength:
+          type: integer
+          minimum: 0
+          maximum: 100
+        premiumFont:
+          type: string
+          enum: [default, prompt, kanit, chakra, ibm-plex, mitr]
+        premiumTextEffect:
+          type: string
+          enum: [none, glow, gradient, fuzzy]
+        showProBadge:
+          type: boolean
+        avatarX:
+          type: integer
+          minimum: 0
+          maximum: 100
+        avatarY:
+          type: integer
+          minimum: 0
+          maximum: 100
+        avatarZoom:
+          type: integer
+          minimum: 100
+          maximum: 300
+        musicVolume:
+          type: integer
+          minimum: 0
+          maximum: 100
+    ProfileAppearance:
+      allOf:
+        - $ref: "#/components/schemas/ProfileAppearanceInput"
+      required: [displayNameColor, descriptionColor, locationColor, socialColor, musicColor, viewsColor, enterTextColor, glowIntensity, showProfileFrame, profileFrameColor, profileFrameBackgroundColor, profileFrameBlur, backgroundEffect, avatarX, avatarY, avatarZoom, musicVolume, premiumBackground, premiumBackgroundStrength, premiumFont, premiumTextEffect, showProBadge, showCredit]
+    ExtraAudioTrack:
+      type: object
+      required: [path, title]
+      properties:
+        path:
+          type: [string, "null"]
+        title:
+          type: string
+          maxLength: 80
+    ProfileLink:
+      type: object
+      required: [id, platform, mode, value, label, icon, resolvedUrl, sortOrder]
+      properties:
+        id:
+          type: string
+        platform:
+          type: string
+          enum: [instagram, tiktok, youtube, soundcloud, discord, github, spotify, twitch, x, facebook, threads, linkedin, line, telegram, whatsapp, messenger, pinterest, snapchat, reddit, bluesky, mastodon, tumblr, vk, wechat, xiaohongshu, vimeo, kick, applemusic, bandcamp, behance, dribbble, artstation, deviantart, flickr, patreon, kofi, buymeacoffee, onlyfans, medium, substack, gumroad, gitlab, stackoverflow, codepen, devto, steam, roblox, itchio, linktree, website, custom]
+        mode:
+          type: string
+          enum: [url, text]
+        value:
+          type: string
+          maxLength: 200
+        label:
+          type: [string, "null"]
+          maxLength: 48
+        icon:
+          type: [string, "null"]
+          enum: [bluesky, discord, facebook, github, instagram, kofi, linktree, mastodon, medium, patreon, pinterest, reddit, soundcloud, spotify, telegram, threads, tiktok, twitch, whatsapp, x, youtube, null]
+        resolvedUrl:
+          type: [string, "null"]
+          format: uri
+        sortOrder:
+          type: integer
+          minimum: 0
+    ProfileLinkInput:
+      type: object
+      required: [platform, mode, value]
+      properties:
+        platform:
+          type: string
+          enum: [instagram, tiktok, youtube, soundcloud, discord, github, spotify, twitch, x, facebook, threads, linkedin, line, telegram, whatsapp, messenger, pinterest, snapchat, reddit, bluesky, mastodon, tumblr, vk, wechat, xiaohongshu, vimeo, kick, applemusic, bandcamp, behance, dribbble, artstation, deviantart, flickr, patreon, kofi, buymeacoffee, onlyfans, medium, substack, gumroad, gitlab, stackoverflow, codepen, devto, steam, roblox, itchio, linktree, website, custom]
+        mode:
+          type: string
+          enum: [url, text]
+        value:
+          type: string
+          minLength: 1
+          maxLength: 200
+        label:
+          type: [string, "null"]
+          maxLength: 48
+        icon:
+          type: [string, "null"]
+          enum: [bluesky, discord, facebook, github, instagram, kofi, linktree, mastodon, medium, patreon, pinterest, reddit, soundcloud, spotify, telegram, threads, tiktok, twitch, whatsapp, x, youtube, null]
+    ProfileLinksInput:
+      type: object
+      required: [links]
+      properties:
+        links:
+          type: array
+          maxItems: 20
+          items:
+            $ref: "#/components/schemas/ProfileLinkInput"
+    ProfileWithLinks:
+      type: object
+      required: [profile, links]
+      properties:
+        profile:
+          $ref: "#/components/schemas/Profile"
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileLink"
+    PublicProfile:
+      type: object
+      allOf:
+        - $ref: "#/components/schemas/ProfileAppearance"
+      required:
+        - username
+        - displayName
+        - bio
+        - showAvatar
+        - location
+        - theme
+        - backgroundColor
+        - avatarPath
+        - backgroundPath
+        - backgroundType
+        - audioPath
+        - audioTitle
+        - audioCoverPath
+        - showMusicPlayer
+        - showVolumeControl
+        - focusX
+        - focusY
+        - dimOpacity
+        - enterText
+        - showViews
+        - viewCount
+        - premiumBackground
+        - premiumBackgroundStrength
+        - premiumFont
+        - premiumTextEffect
+        - showProBadge
+        - showCredit
+        - extraAudioTracks
+      properties:
+        username:
+          type: string
+        displayName:
+          type: string
+        bio:
+          type: string
+        showAvatar:
+          type: boolean
+        location:
+          type: string
+        theme:
+          type: string
+          enum: [ember, tide, moss, orchid]
+        backgroundColor:
+          type: string
+          pattern: "^#[0-9A-Fa-f]{6}$"
+        avatarPath:
+          type: [string, "null"]
+        backgroundPath:
+          type: [string, "null"]
+        backgroundType:
+          type: [string, "null"]
+          enum: [image, video, null]
+        audioPath:
+          type: [string, "null"]
+        audioTitle:
+          type: string
+        audioCoverPath:
+          type: [string, "null"]
+        extraAudioTracks:
+          type: array
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/ExtraAudioTrack"
+        showMusicPlayer:
+          type: boolean
+        showVolumeControl:
+          type: boolean
+        focusX:
+          type: integer
+        focusY:
+          type: integer
+        dimOpacity:
+          type: integer
+        enterText:
+          type: string
+        showViews:
+          type: boolean
+        viewCount:
+          type: integer
+        premiumBackground:
+          type: string
+          enum: [none, aurora, stars, rain, film]
+        premiumBackgroundStrength:
+          type: integer
+          minimum: 0
+          maximum: 100
+        premiumFont:
+          type: string
+          enum: [default, prompt, kanit, chakra, ibm-plex, mitr]
+        premiumTextEffect:
+          type: string
+          enum: [none, glow, gradient, fuzzy]
+        showProBadge:
+          type: boolean
+        showCredit:
+          type: boolean
+    PublicProfileResponse:
+      type: object
+      required: [profile, links]
+      properties:
+        profile:
+          $ref: "#/components/schemas/PublicProfile"
+        links:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProfileLink"
+    UsernameAvailability:
+      type: object
+      required: [available, username, reason]
+      properties:
+        available:
+          type: boolean
+        username:
+          type: string
+        reason:
+          type: [string, "null"]
+    AccountSummary:
+      type: object
+      required: [username, profileUrl, profileCompletePercent, linkCount, viewCount, updatedAt]
+      properties:
+        username:
+          type: string
+        profileUrl:
+          type: string
+        profileCompletePercent:
+          type: integer
+          minimum: 0
+          maximum: 100
+        linkCount:
+          type: integer
+          minimum: 0
+        viewCount:
+          type: integer
+          minimum: 0
+        updatedAt:
+          type: string
+          format: date-time
+    AccountEmailState:
+      type: object
+      required: [email, updatedAt, accountCreatedAt]
+      properties:
+        email:
+          type: [string, "null"]
+          format: email
+        updatedAt:
+          type: [string, "null"]
+          format: date-time
+        accountCreatedAt:
+          type: string
+          format: date-time
+    BillingConfig:
+      type: object
+      required: [billingAvailable, plans]
+      properties:
+        billingAvailable:
+          type: boolean
+        plans:
+          type: object
+          required: [basic, pro]
+          properties:
+            basic:
+              type: boolean
+            pro:
+              type: boolean
+    CheckoutInput:
+      type: object
+      required: [plan]
+      properties:
+        plan:
+          type: string
+          enum: [basic]
+    CheckoutSession:
+      type: object
+      required: [checkoutUrl]
+      properties:
+        checkoutUrl:
+          type: string
+          format: uri
+    BillingPortalSession:
+      type: object
+      required: [portalUrl]
+      properties:
+        portalUrl:
+          type: string
+          format: uri
+    MembershipState:
+      type: object
+      required: [plan, startedAt, expiresAt, giftedAt, billingManaged]
+      properties:
+        plan:
+          type: [string, "null"]
+          enum: [basic, pro, null]
+        startedAt:
+          type: [string, "null"]
+          format: date-time
+        expiresAt:
+          type: [string, "null"]
+          format: date-time
+        giftedAt:
+          type: [string, "null"]
+          format: date-time
+        billingManaged:
+          type: boolean
+    GiftMembershipInput:
+      type: object
+      required: [username, plan, days]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 20
+          pattern: "^[A-Za-z0-9_]{3,20}$"
+        plan:
+          type: string
+          enum: [basic, pro]
+        days:
+          type: integer
+          minimum: 1
+          maximum: 36500
+    GiftedMembership:
+      type: object
+      required: [username, plan, startedAt, expiresAt, grantedAt]
+      properties:
+        username:
+          type: string
+        plan:
+          type: string
+          enum: [basic, pro]
+        startedAt:
+          type: string
+          format: date-time
+        expiresAt:
+          type: string
+          format: date-time
+        grantedAt:
+          type: string
+          format: date-time
+    MembershipListResponse:
+      type: object
+      required: [memberships]
+      properties:
+        memberships:
+          type: array
+          items:
+            $ref: "#/components/schemas/GiftedMembership"
+    GiftMembershipResult:
+      allOf:
+        - $ref: "#/components/schemas/GiftedMembership"
+    AccountDeletionInput:
+      type: object
+      required: [confirmed]
+      properties:
+        confirmed:
+          type: boolean
+          enum: [true]
+    AccountDeletionResult:
+      type: object
+      required: [deleted]
+      properties:
+        deleted:
+          type: boolean
+          enum: [true]
+    AccountDeletionStatus:
+      type: object
+      required: [status, requestedAt, scheduledFor, canCancel]
+      properties:
+        status:
+          type: string
+          enum: [none, pending, processing]
+        requestedAt:
+          type: [string, "null"]
+          format: date-time
+        scheduledFor:
+          type: [string, "null"]
+          format: date-time
+        canCancel:
+          type: boolean
+    TermsDocumentInput:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 60000
+    TermsDocument:
+      type: object
+      required: [content, effectiveAt]
+      properties:
+        content:
+          type: string
+        effectiveAt:
+          type: string
+          format: date-time
+    PrivacyPolicyDocument:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+    PrivacyPolicyInput:
+      type: object
+      required: [content]
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 60000
+    AdminTermsDocument:
+      type: object
+      required: [content, effectiveAt, isPublished]
+      properties:
+        content:
+          type: string
+        effectiveAt:
+          type: [string, "null"]
+          format: date-time
+        isPublished:
+          type: boolean
+    AdminPrivacyPolicyDocument:
+      type: object
+      required: [content, isPublished]
+      properties:
+        content:
+          type: string
+        isPublished:
+          type: boolean
+    ViewCount:
+      type: object
+      required: [viewCount]
+      properties:
+        viewCount:
+          type: integer
+          minimum: 0
+    UploadUrlRequest:
+      type: object
+      required: [name, size, contentType, assetField]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        size:
+          type: integer
+          minimum: 1
+        contentType:
+          type: string
+          minLength: 1
+        assetField:
+          type: string
+          enum: [avatarPath, backgroundPath, audioPath, audioPath2, audioPath3, audioPath4, audioCoverPath]
+    UploadUrlResponse:
+      type: object
+      required: [uploadURL, objectPath, metadata]
+      properties:
+        uploadURL:
+          type: string
+          format: uri
+        objectPath:
+          type: string
+        metadata:
+          $ref: "#/components/schemas/UploadUrlRequest"
+    UploadCompleteInput:
+      type: object
+      required: [objectPath]
+      properties:
+        objectPath:
+          type: string
+          minLength: 1
+    UploadCompleteResponse:
+      type: object
+      required: [objectPath, publicUrl]
+      properties:
+        objectPath:
+          type: string
+        publicUrl:
+          type: string
+    ProfileReportInput:
+      type: object
+      required: [username, reason, details]
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 20
+          pattern: "^[A-Za-z0-9_]{3,20}$"
+        reason:
+          type: string
+          enum: [spam, scam, impersonation, harassment, sexual_content, other]
+        details:
+          type: string
+          minLength: 1
+          maxLength: 1000
+          pattern: "\\S"
+    ProfileReportResponse:
+      type: object
+      required: [id, status]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [new]
+    ModeratorAccessResponse:
+      type: object
+      required: [isModerator, isOwner]
+      properties:
+        isModerator:
+          type: boolean
+        isOwner:
+          type: boolean
+    Moderator:
+      type: object
+      required: [id, email, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        createdAt:
+          type: string
+          format: date-time
+    ModeratorListResponse:
+      type: object
+      required: [moderators]
+      properties:
+        moderators:
+          type: array
+          items:
+            $ref: "#/components/schemas/Moderator"
+    AddModeratorInput:
+      type: object
+      required: [email]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+    ModeratorCreateResult:
+      type: object
+      required: [moderator]
+      properties:
+        moderator:
+          $ref: "#/components/schemas/Moderator"
+    ModeratorRemovalResult:
+      type: object
+      required: [removed]
+      properties:
+        removed:
+          type: boolean
+    ModerationReport:
+      type: object
+      required:
+        - id
+        - targetUsername
+        - targetDisplayName
+        - profileExists
+        - isSuspended
+        - reason
+        - details
+        - status
+        - moderationNote
+        - createdAt
+        - moderatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+        targetUsername:
+          type: string
+        targetDisplayName:
+          type: [string, "null"]
+        profileExists:
+          type: boolean
+        isSuspended:
+          type: boolean
+        reason:
+          type: string
+          enum: [spam, scam, impersonation, harassment, sexual_content, other]
+        details:
+          type: string
+        status:
+          type: string
+          enum: [new, reviewing, dismissed, actioned]
+        moderationNote:
+          type: [string, "null"]
+        createdAt:
+          type: string
+          format: date-time
+        moderatedAt:
+          type: [string, "null"]
+          format: date-time
+    ModerationReportListResponse:
+      type: object
+      required: [reports, total]
+      properties:
+        reports:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModerationReport"
+        total:
+          type: integer
+          minimum: 0
+    ModerationReportUpdateInput:
+      type: object
+      required: [status, profileAction]
+      properties:
+        status:
+          type: string
+          enum: [reviewing, dismissed, actioned]
+        profileAction:
+          type: string
+          enum: [keep, hide, restore]
+        moderationNote:
+          type: [string, "null"]
+          maxLength: 1000
+    ModerationReportUpdateResponse:
+      type: object
+      required: [report]
+      properties:
+        report:
+          $ref: "#/components/schemas/ModerationReport"
+
