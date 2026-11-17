@@ -1,71 +1,91 @@
-# GBLOC
+<div align="center">
+  <h1>GBLOC</h1>
+  <p><strong>Your link in bio. Your own space.</strong></p>
+  <p>A self-hosted profile builder for public pages, social links, optional media, and account management.</p>
+  <p>
+    <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-9b6bdb?style=flat-square">
+    <img alt="Node.js 22.12+" src="https://img.shields.io/badge/Node.js-22.12%2B-9b6bdb?style=flat-square">
+    <img alt="pnpm 10+" src="https://img.shields.io/badge/pnpm-10%2B-9b6bdb?style=flat-square">
+  </p>
+</div>
 
-GBLOC is a profile builder with public profile pages, social links, optional
-media, and an account dashboard.
+## In this guide
+
+[Run locally](#run-locally) · [Sign-in and optional services](#sign-in-and-optional-services) · [Development checks](#development-checks) · [License](#license)
 
 ## Run locally
 
-Requirements: Node.js 22.12 or newer, pnpm 10 or newer, and Docker Desktop (or
-an existing PostgreSQL 16 database).
+> [!NOTE]
+> This quick start is for local development. Use a fresh local database; never point it at a production database.
 
-1. Install dependencies:
+### Requirements
 
-   ```sh
-   pnpm install
-   ```
+| Tool | Version |
+| --- | --- |
+| Node.js | 22.12 or newer |
+| pnpm | 10 or newer |
+| PostgreSQL | 16, or Docker Desktop to run it locally |
 
-2. Create local configuration and a private session secret:
+### 1. Install dependencies
 
-   ```sh
-   cp .env.example .env
-   node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
-   ```
+```sh
+pnpm install
+```
 
-   In PowerShell, use `Copy-Item .env.example .env` instead of `cp`. Copy the
-   generated value into `SESSION_SECRET` in `.env`.
+### 2. Create your local environment
 
-3. Start the local PostgreSQL database:
+Copy the example settings and generate a private session secret:
 
-   ```sh
-   pnpm db:up
-   ```
+```sh
+cp .env.example .env
+node -e "console.log(require('node:crypto').randomBytes(32).toString('base64url'))"
+```
 
-   If PostgreSQL is already installed locally, skip this and set `DATABASE_URL`
-   in `.env` to that database.
+In PowerShell, use `Copy-Item .env.example .env` instead of `cp`. Put the generated value in `SESSION_SECRET` inside `.env`.
 
-4. Create the database tables and start the web app plus API:
+### 3. Start PostgreSQL
 
-   ```sh
-   pnpm db:push
-   pnpm dev
-   ```
+```sh
+pnpm db:up
+```
 
-5. Open `http://localhost:5173`.
+If PostgreSQL is already installed, skip this command and set `DATABASE_URL` in `.env`.
 
-The local setup stores profile uploads under `./var/gbloc-storage`. That folder
-and the local database are not committed to Git. Use a fresh local database;
-do not point this setup at an existing production database. Existing uploads
-must be copied to the chosen storage provider before connecting an existing
-database to this installation.
+### 4. Create tables and start GBLOC
+
+```sh
+pnpm db:push
+pnpm dev
+```
+
+Open [http://localhost:5173](http://localhost:5173).
+
+### Local files and data
+
+Profile uploads are stored in `./var/gbloc-storage`. The local database and this folder are not committed to Git.
+
+> [!WARNING]
+> If you connect an existing database, copy its uploads to your chosen storage provider first. Do not point a local setup at production data.
 
 ## Sign-in and optional services
 
-Google sign-in requires your own Google OAuth client. Add the client ID and
-secret to `.env` and register this callback URL with Google:
+Public pages work without sign-in configuration. Account features require Google sign-in, which uses your own Google OAuth client. Add its client ID and secret to `.env`, then register this callback URL with Google:
 
 ```text
 http://localhost:5173/api/auth/google/callback
 ```
 
-Public pages can be explored without configuring sign-in, but account features
-require it. Stripe billing is disabled by default. Configure your own Stripe
-keys, webhook secret, and Price IDs only if you want to test payments.
+Stripe billing is disabled by default. Add your own Stripe keys, webhook secret, and Price IDs only if you want to test payments.
 
-See [INTEGRATIONS.md](./INTEGRATIONS.md) for the current providers and how to
-add another service. See [BILLING_SETUP.md](./BILLING_SETUP.md) and
-[STORAGE_MIGRATION.md](./STORAGE_MIGRATION.md) for provider-specific details.
+| Guide | What it covers |
+| --- | --- |
+| [INTEGRATIONS.md](./INTEGRATIONS.md) | Current providers and how to add another service |
+| [BILLING_SETUP.md](./BILLING_SETUP.md) | Optional Stripe billing setup |
+| [STORAGE_MIGRATION.md](./STORAGE_MIGRATION.md) | Storage-provider details |
 
 ## Development checks
+
+Run these before sending a change:
 
 ```sh
 pnpm run typecheck
@@ -73,8 +93,7 @@ pnpm --filter @workspace/gbloc run test:seo
 pnpm --filter @workspace/api-server run test
 ```
 
-The OpenAPI document is the API contract source. After changing it, regenerate
-the client hooks and server validators:
+The OpenAPI document is the source of truth for the API contract. After changing it, regenerate the client hooks and server validators:
 
 ```sh
 pnpm --filter @workspace/api-spec run codegen
@@ -82,11 +101,9 @@ pnpm --filter @workspace/api-spec run codegen
 
 ## License
 
-GBLOC is released under the MIT License. See [LICENSE](./LICENSE).
+GBLOC is released under the [MIT License](./LICENSE).
 
-## Local-only deployment warning
+## Before going online
 
-This quick-start is for development on your own computer. Before exposing an
-installation to the internet, replace every example credential, use HTTPS,
-configure durable private storage and database backups, and review the default
-terms and privacy documents for your own service.
+> [!IMPORTANT]
+> This quick start is for development on your own computer. Before exposing an installation to the internet, replace all example credentials, use HTTPS, configure durable private storage and database backups, and review the default terms and privacy documents for your service.
