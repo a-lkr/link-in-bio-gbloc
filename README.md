@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="assets/preview.png" width="900" alt="gbloc Preview">
+  <img src="assets/preview.png.png" width="900" alt="gbloc Preview">
 </p>
 
 <div align="center">
