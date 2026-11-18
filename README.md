@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/preview.png" width="900" alt="gbloc Preview">
+</p>
+
 <div align="center">
   <h1>GBLOC</h1>
   <p><strong>Your link in bio. Your own space.</strong></p>
