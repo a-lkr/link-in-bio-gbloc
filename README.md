@@ -5,7 +5,7 @@
 <div align="center">
   <h1>GBLOC</h1>
   <p><strong>Your link in bio. Your own space.</strong></p>
-  <p>A self-hosted profile builder for public pages, social links, optional media, and account management.</p>
+  <p>A self-hosted, multi-user profile platform. Sign up, claim your own @username, and build a personalized space with social links, custom media, and more.</p>
   <p>
     <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-9b6bdb?style=flat-square">
     <img alt="Node.js 22.12+" src="https://img.shields.io/badge/Node.js-22.12%2B-9b6bdb?style=flat-square">
@@ -13,11 +13,9 @@
   </p>
 </div>
 
-## 🇹🇭 Language & Localization
+## Language & Localization
 
 This project is originally developed with Thai as its primary language. If you're not a Thai speaker, you'll need to translate the text yourself.
-
-However, most text and UI elements can be easily customized using HTML. You can simply use the Live Preview to see your changes in real time, making localization and customization relatively straightforward.
 
 If you're a Thai speaker, you're in luck / everything should be much easier for you!
 
