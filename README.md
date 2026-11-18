@@ -9,6 +9,14 @@
   </p>
 </div>
 
+## 🇹🇭 Language & Localization
+
+This project is originally developed with Thai as its primary language. If you're not a Thai speaker, you'll need to translate the text yourself.
+
+However, most text and UI elements can be easily customized using HTML. You can simply use the Live Preview to see your changes in real time, making localization and customization relatively straightforward.
+
+If you're a Thai speaker, you're in luck / everything should be much easier for you!
+
 ## In this guide
 
 [Run locally](#run-locally) · [Sign-in and optional services](#sign-in-and-optional-services) · [Development checks](#development-checks) · [License](#license)
